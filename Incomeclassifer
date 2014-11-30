@@ -1,0 +1,296 @@
+"""
+    I herby declare that all work in this assignment is all mine and nobody else's.
+     I have completed this code as part of my CA for OOP year 2.
+     As part of my Bachelor of Science in Computing degree.
+     
+    Dean O'Reilly C13469208
+
+     All work copyright
+
+     DOR
+
+     """
+    
+
+
+
+
+
+def creating_class_data(line_count,my_list):            # line count and the full list is passed 
+    trainingsize=int(line_count*.70)                    #70 percent of the total
+    class_list=[]
+    i=0
+    test_list=[]
+    for i in range(0,int(trainingsize)):                # copies from 0 to number in training size and appends it into a new list
+        class_list.append(my_list[i])
+   
+    for j in range(int(trainingsize),int(len(my_list))):# appends the rows from training-size to the end of the file to test-list
+        test_list.append(my_list[j])
+                   
+    return class_list,test_list                         #returns the lists to called
+
+
+def downloadinghttp():
+                                                #this part of the code downloads the file using httplib2 and stores what I need into myfile
+    import httplib2                             # preinstalled into the python/lib folder 
+    h=httplib2.Http(".cache")                   # creates a .cache file 
+    headers,myfile=h.request("http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data")    # request the data 
+    myfile=myfile.decode().split("\n")          #decoded and split into a list now myfile
+    line_count=0                              
+    my_list=[]                                  #holds all the rows of teh file 
+    for row in myfile:
+        my_list.append(row.split(', '))         #after spliting the row into a list at each ',' it addes it to my_list
+        line_count+=1
+                                                #creates a list of the list and places it into my_list;
+
+
+    test_list=[]                                #for returning test_list
+    class_row,test_list=creating_class_data(line_count,my_list)     # calls the function and passes line_count and my_list and recieves classifer_list and test_list                         
+    return(class_row,line_count,test_list)                          #returns the two lists and line count to main 
+                                                #gets two list back less and greater than 50k of training size i.e. 70%
+
+
+                                                #changing the value of a dictories to deciamal
+def changingtodeciamal(linecountr,dic):
+    for key,value in dic.items():               #this creates basically a counter 
+        a,b=key,value                           #copies the values     
+        b=int(b)
+                                                #needs to be an int to be devided
+        b=b/int(linecountr)
+        dic[key]=b                              #replaces values 
+    return(dic)                                 #returns dic 
+        
+        
+                                                #working now need to implement into functions 
+
+def numeric(value,my_list):                     # recieves the element of the row number i.e row[0] for age , and the classifer_list
+    greaterthan50= ">50K"                       # This is just to allow seperation to occur
+    lessthan= "<=50K"
+    linec1=0                                    # line counters 
+    linec2=0
+    above=0
+    below=0
+    temp=0
+                                                # the loop moves around the list and by using row 
+    for row in my_list:
+        if row[-1] == greaterthan50:            #seperates depending on last value
+            linec1+=1                           # increments line count by 1
+            above=above+int(row[value])         # adds the value of the row number to each other
+        
+        elif row[-1] == lessthan:               # does the same only difference is if it is less than 50k
+            linec2+=1
+            below=below+int(row[value])
+
+            
+    below=below/linec2                          #Maths . Devide the number added by the total number of lines and leaves you with the average 
+    above=above/linec1
+    midpoint=above+below                        #Both the averages added together and devided by two leaves you with the Averages of Averages.
+    midpoint=midpoint/2
+    return midpoint                             # As there is no need to change numbers to numbers, only the midpoint is returned  
+
+
+def non_numeric(number,my_list):                # This is where Strings are giving a numeric value.
+                                                # Achived by counting how many times one such string occurs in its attribute and then deviding by total number of that atrribute
+    
+    greaterthan50= ">50K"
+    lessthan= "<=50K"
+    workclass_above={}
+    workclass_below={}
+    linecountr=0
+    linecounth=0
+    
+    for row in my_list:
+        if row[14] == greaterthan50:
+            linecountr+=1
+            if row[number] in workclass_above:      #checks if the string is already in the dic ;
+                                                    #if so it increases its value;
+                workclass_above[row[number]]+=1
+            else:
+               
+                workclass_above[row[number]]=1      #if not it creates it as a key and gives it a value of 1 
+                
+        if row[14] == lessthan:
+            linecounth+=1
+            if row[number] in workclass_below:
+                workclass_below[row[number]]+=1
+            else:                                   #Same again but just in below 50 
+                workclass_below[row[number]]=1 
+    midpoint={}
+    average_value={}
+    average_value2={}
+    temp=0
+    
+    workclass_above=changingtodeciamal(linecountr,workclass_above) #passes the line countr above and the dictory to get the decimal value 
+    workclass_below=changingtodeciamal(linecounth,workclass_below)
+  
+    total=0
+    total2=0
+    num=0
+    num2=0
+    
+    for key,value in workclass_above.items():       # This for loops copies the value of the workclass_above and places it into  b which allows easier use of the value
+        num+=1
+        b=value  
+        total=total+b                               # Adds all the values together  
+    for key,value in workclass_below.items():
+        num2+=1
+        d=value
+        total2=total2+d
+    total=total/num                                 # Then devides that by number of values to get the average 
+    total2=total2/num2
+    
+  
+
+    temp=0                                          #this gets the midpoint average . Adding the two averages together and deviding by two, gets the average of averages 
+    temp=total+total2
+    temp=temp/2
+
+    return(workclass_above,workclass_below,temp)    # Returns the string vaules for above,below and the midpoint average 
+                                                
+  
+def main():
+                                                # List for average of each part of the training set                                      
+    class_row=[]                                # Theses are the rows used for the  classifer 
+    test_list=[]                                # Theses are the test rows                            
+    trainingsize=0
+    greaterthan50= ">50K"
+    lessthan= "<=50K"
+    temptemp=0
+    
+    class_row,line_count,test_list=downloadinghttp() # Calling downloadinghttp and returning a list and int line count
+   
+#dictories
+    Num_list=[0,4,10,11,12]                         # The locations in the row which contain numeric and non-numeric 
+    Non_list=[1,5,6,7,8,9]
+    
+    midpoint_dic={}
+    above_dic_str={}
+    below_dic_str={}
+    
+    lc1=0
+    lc2=0
+ 
+    
+    for i in Num_list:                          # For each numeric attribute, it calles the numeric function and recieves the midpoint average to be tested against later
+        mid=0
+        mid=numeric(i,class_row)
+        midpoint_dic.update({int(i):mid})
+
+       
+    i=0  
+    for i in Non_list:
+
+       
+        temp={}                                 #   The non-Numeric values for each attribute above 50k
+        tempp={}                                #   Non-Numeric value for below 50k
+        temp3=0                                 #   Midpoint overall value
+        
+        temp,tempp,temp3=non_numeric(i,class_row)   # This Function sends the element form Non_list and the class_row to non_numeric to return the numeric value for
+                                                    # string    temp = above , tempp= below , temp3 = holds the midpoint average for each attribute.                     
+        midpoint_dic.update({i:temp3})              # holds all the midpoint averages 
+        above_dic_str.update(temp)                  # all the above values
+        below_dic_str.update(tempp)                 # all the below values 
+    
+
+    i=0
+    p=0
+    j=0
+                                                     # Variables 
+    above_above=0
+    below_above=0
+    above_below=0
+    below_below=0
+    row_count=0
+    indicator=0
+    
+    v_holder=0
+    v_holder1=0
+   
+    
+    
+    for row in test_list:                       # Moves through the rows in test_list
+        row_count+=1                            # Row Count
+        element_count=0                         # Counter for moving through 
+        element_count2=0
+        
+        if row[-1] == greaterthan50:            # Seperates above and below baased on the 14 element 
+                                           
+            fg=0                                # Flag for if the value is above midpoint
+            fg_neg=0                            # Flag for if the value is below midpoint
+            
+            for i in row :                      # Moves through the row 
+                if element_count in Non_list:   # If the element in the row is in the Non_list ,proceed 
+                   for key,value in above_dic_str.items():      # This code allows access to the key, values in dictionaries
+                       if i == key:             # It then compares they keys in the dictionary to the element in the row ! 
+                           v_holder=value       # v_holder holders the value for use then 
+                           
+                for key,value in midpoint_dic.items():  
+                    if element_count == key:    # As the keys in the midpoint_dic is saved as the element number ,just need to compare to the element_count to find the value
+                        if v_holder > value:    # The if statement records if the element value is above,below the midpoint value
+                            fg+=1
+                        elif v_holder <= value:
+                            fg_neg+=1
+                element_count+=1                # Element_count increment 
+                
+           
+            if fg < fg_neg:                     # The amount of flags for above and below midpoint are compareed 
+                indicator+=1                     # The inicator variable keeps trac
+    
+                
+    
+        elif row[-1] == lessthan:               # Basically does the same as above 
+            flg=0                               # Flags reset - allows reuseable variabeles 
+            flg_neg=0 
+            for j in row :
+                if element_count2 in Non_list:
+                   for key,value in below_dic_str.items():  # Below_dic_str used to get values 
+                       if j == key:   
+                           v_holder1=value                  # uses v_holder1 to hold value 
+                
+                for key,value in midpoint_dic.items():      # The loop allows use of the key and value in the dic 
+                    if element_count2 == key:               # Compares the element count to the key in the dic.
+                        if v_holder1 >= value:              # The value of the key is then compared to that in v_holder2 if below
+                            flg+=1                          # Flag incremented
+                        elif v_holder1 <= value:            # If the value is above 
+                            flg_neg+=1                      # Flag incremented 
+                            
+                element_count2+=1                           # Counter Incremented to move through the Row
+
+            if flg <= flg_neg:                              # The amount of flags are compared and increment is increased if accuracy is implied  
+                indicator+=1
+   
+    print(" Data analysied from URL : http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data ")
+    print(" Classifer values found for the first 70% of the data and tested against the final 30%")
+    print(" Number of files used to gather data for classifer: ",len(class_row))
+    print(" Number of files tested against Classifer : ",row_count)                         
+    print(" Number of files which indicate the Classifer, Accuracy : ",indicator)
+    indicator=indicator/row_count
+    indicator=indicator*100/1                                           # Maths to get the percentage value of accuracy 
+    print(" Percentage value of accuracy : %.2f "%round(indicator,2))    # %round(indicator,2) rounds off to .2 deciamal points 
+    
+    
+  
+
+
+
+
+main()                                                                  # Placing main here allows the program to work instantly
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
